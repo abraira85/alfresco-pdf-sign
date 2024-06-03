@@ -1,0 +1,206 @@
+# This docker-compose file will spin up an ACS community installation on a local host.
+# It requires at least 6GB of memory available to distribute among containers.
+#
+# For performance tuning, increase each container mem_limit and give a percentage of
+# it to the JVM. Use either the -Xms,-Xmx flags or the newly added flags in
+# java 10+: -XX:MaxRAMPercentage and -XX:MinRAMPercentage.
+# More details here:
+# https://www.oracle.com/technetwork/java/javase/10-relnote-issues-4108729.html
+#
+# Using version 2 as 3 does not support resource constraint options
+# (cpu_*, mem_* limits) for non swarm mode in Compose
+
+############# VOLUMES ############
+volumes:
+    postgres_data:
+    shared-file-store-volume:
+        driver_opts:
+            type: tmpfs
+            device: tmpfs
+
+
+############ SERVICES ############
+services:
+    # Alfresco Content Repository Service
+    alfresco:
+        image: alfresco/alfresco-content-repository-community:7.4.2
+        container_name: alfresco
+        restart: always
+        mem_limit: 1900m
+        volumes:
+            - ./docker/alfresco-content-repository/extensions/:/usr/local/tomcat/amps/
+        environment:
+            JAVA_TOOL_OPTIONS: >-
+                -Dencryption.keystore.type=JCEKS
+                -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
+                -Dencryption.keyAlgorithm=DESede
+                -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
+                -Dmetadata-keystore.password=${KEYSTORAGE_PASSWORD}
+                -Dmetadata-keystore.aliases=metadata
+                -Dmetadata-keystore.metadata.password=${KEYSTORAGE_METADATA_PASSWORD}
+                -Dmetadata-keystore.metadata.algorithm=DESede
+            JAVA_OPTS: >-
+                -Ddb.driver=org.postgresql.Driver
+                -Ddb.username=${POSTGRES_USER}
+                -Ddb.password=${POSTGRES_PASSWORD}
+                -Ddb.url=jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+                -Dsolr.host=${SOLR_HOST}
+                -Dsolr.port=${SOLR_PORT_INTERNAL}
+                -Dsolr.http.connection.timeout=1000
+                -Dsolr.secureComms=secret
+                -Dsolr.sharedSecret=${ALFRESCO_SECURE_SECRET}
+                -Dsolr.base.url=/solr
+                -Dindex.subsystem.name=solr6
+                -Dshare.host=${SHARE_HOST}
+                -Dshare.port=${SHARE_PORT}
+                -Dalfresco.host=${ALFRESCO_ALIAS}
+                -Dalfresco.port=${ALFRESCO_PORT}
+                -Dtransform.service.enabled=true
+                -Dcsrf.filter.enabled=false
+                -Daos.baseUrlOverwrite=${ALFRESCO_PROTOCOL}://${ALFRESCO_ALIAS}:${ALFRESCO_PORT}/${ALFRESCO_CONTEXT}/aos
+                -Dmessaging.broker.url="failover:(nio://${ACTIVEMQ_HOST}:${ACTIVEMQ_OPENWIRE_PORT})?timeout=3000&jms.useCompression=true"
+                -Ddeployment.method=DOCKER_COMPOSE
+                -DlocalTransform.core-aio.url=http://${TRANSFORM_CORE_AIO_HOST}:${TRANSFORM_CORE_AIO_PORT}/
+                -XX:MinRAMPercentage=50
+                -XX:MaxRAMPercentage=80
+        env_file:
+            - .env
+
+    # Alfresco Transform Core AIO Service
+    transform-core-aio:
+        image: alfresco/alfresco-transform-core-aio:5.1.1
+        container_name: transform-core-aio
+        restart: always
+        mem_limit: 1536m
+        environment:
+            JAVA_OPTS: >-
+                -XX:MinRAMPercentage=50
+                -XX:MaxRAMPercentage=80
+            ACTIVEMQ_URL: nio://${ACTIVEMQ_HOST}:${ACTIVEMQ_OPENWIRE_PORT}
+        ports:
+            - "${TRANSFORM_CORE_AIO_PORT}:8090"
+        env_file:
+            - .env
+
+    # Alfresco Share Service
+    share:
+        image: docker.io/alfresco/alfresco-share:7.4.2
+        container_name: share
+        restart: always
+        mem_limit: 1g
+        environment:
+            REPO_HOST: "${ALFRESCO_HOST}"
+            REPO_PORT: "${ALFRESCO_PORT}"
+            JAVA_OPTS: >-
+                -XX:MinRAMPercentage=50
+                -XX:MaxRAMPercentage=80
+                -Dalfresco.host=${ALFRESCO_ALIAS}
+                -Dalfresco.port=${ALFRESCO_PORT}
+                -Dalfresco.context=${ALFRESCO_CONTEXT}
+                -Dalfresco.protocol=${ALFRESCO_PROTOCOL}
+        env_file:
+            - .env
+
+    # Postgres Database Service
+    postgres:
+        image: postgres:14.4
+        container_name: postgres
+        restart: always
+        mem_limit: 512m
+        environment:
+            - POSTGRES_DB=${POSTGRES_DB}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+        command: postgres -c max_connections=300 -c log_min_messages=LOG
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/
+        ports:
+            - "${POSTGRES_PORT}:5432"
+        env_file:
+            - .env
+
+    # Apache Solr v6 Service
+    search-services:
+        image: docker.io/alfresco/alfresco-search-services:2.0.10
+        container_name: search-services
+        restart: always
+        mem_limit: 2g
+        environment:
+            # Solr needs to know how to register itself with Alfresco
+            SOLR_ALFRESCO_HOST: "${ALFRESCO_HOST}"
+            SOLR_ALFRESCO_PORT: "${ALFRESCO_PORT}"
+            # Alfresco needs to know how to call solr
+            SOLR_SOLR_HOST: "${SOLR_HOST}"
+            SOLR_SOLR_PORT: "${SOLR_PORT_INTERNAL}"
+            # Create the default alfresco and archive cores
+            SOLR_CREATE_ALFRESCO_DEFAULTS: "alfresco,archive"
+            # HTTPS or SECRET
+            ALFRESCO_SECURE_COMMS: "secret"
+            # SHARED SECRET VALUE
+            JAVA_TOOL_OPTIONS: >-
+                -Dalfresco.secureComms.secret=${ALFRESCO_SECURE_SECRET}
+        ports:
+            - "${SOLR_PORT_EXTERNAL}:${SOLR_PORT_INTERNAL}" # Browser port
+        env_file:
+            - .env
+
+    # ActiveMQ Service
+    activemq:
+        image: alfresco/alfresco-activemq:5.18-jre17-rockylinux8
+        container_name: activemq
+        restart: always
+        mem_limit: 1g
+        ports:
+            - "${ACTIVEMQ_WEB_CONSOLE_PORT}:8161" # Web Console
+            - "${ACTIVEMQ_AMQP_PORT}:5672" # AMQP
+            - "${ACTIVEMQ_OPENWIRE_PORT}:61616" # OpenWire
+            - "${ACTIVEMQ_STOMP_PORT}:61613" # STOMP
+        env_file:
+            - .env
+
+    # Alfresco Content App Service
+    content-app:
+        image: alfresco/alfresco-content-app:4.4.1
+        container_name: content-app
+        restart: always
+        mem_limit: 128m
+        environment:
+            APP_BASE_SHARE_URL: "${ALFRESCO_PROTOCOL}://${ALFRESCO_ALIAS}:${ALFRESCO_PORT}/aca/#/preview/s"
+        env_file:
+            - .env
+
+    # Alfresco Control Center Service
+    control-center:
+        image: quay.io/alfresco/alfresco-control-center:8.4.1
+        container_name: control-center
+        restart: always
+        mem_limit: 128m
+        environment:
+            APP_CONFIG_PROVIDER: "ECM"
+            APP_CONFIG_AUTH_TYPE: "BASIC"
+            BASE_PATH: ./
+
+    # Alfresco Nginx Proxy
+    nginx-proxy:
+        image: alfresco/alfresco-acs-nginx:3.4.2
+        container_name: nginx-proxy
+        restart: always
+        mem_limit: 128m
+        environment:
+            DISABLE_PROMETHEUS: "true"
+            DISABLE_SYNCSERVICE: "true"
+            DISABLE_ADW: "true"
+            ENABLE_CONTENT_APP: "true"
+        depends_on:
+            - alfresco
+            - content-app
+            - control-center
+        ports:
+            - "${ALFRESCO_PORT}:8080"
+        links:
+            - alfresco
+            - content-app
+            - share
+            - control-center
+        env_file:
+            - .env
