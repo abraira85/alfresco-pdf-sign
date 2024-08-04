@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<extension xmlns="http://www.springframework.org/extensions/surf/extensibility">
+	<modules>
+		<module>
+			<id>PDF Sign Actions UI - Signature</id>
+			<description>Expose the signature action doclib action UI</description>
+			<version>${project.version}</version>
+			<auto-deploy>true</auto-deploy>
+			<evaluator type="site.module.evaluator">
+				<params>
+					<sites>.*</sites>
+					<applyForNonSites>true</applyForNonSites>
+					<groups>SiteManager,SiteCollaborator,SiteContributor</groups>
+					<groupsRelation>OR</groupsRelation>
+				</params>
+			</evaluator>
+			<configurations>
+				<config evaluator="string-compare" condition="DocLibActions">
+					<actions>
+						<action id="pdf-signature"
+							type="javascript"
+							label="actions.pdfsign.signPDF">
+							<param name="function">onActionFormDialog</param>
+			        		<param name="itemKind">pdf-action</param>
+			        		<param name="itemId">pdf-signature</param>
+			        		<param name="mode">create</param>
+			        		<param name="destination">{node.nodeRef}</param>
+			        		<param name="successMessage">message.pdf-signature.success</param>
+			        		<param name="failureMessage">message.pdf-signature.failure</param>
+			        		<evaluator>evaluator.pdfsign.doclib.action.pdfSignMimetype</evaluator>
+						</action>
+					</actions>
+					<actionGroups>
+						<actionGroup id="document-browse">
+							<action index="505" id="pdf-signature"/>
+						</actionGroup>
+						<actionGroup id="document-details">
+							<action index="505" id="pdf-signature"/>
+						</actionGroup>
+					</actionGroups>
+				</config>
+			</configurations>
+		</module>
+	</modules>
+</extension>

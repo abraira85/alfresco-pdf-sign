@@ -126,7 +126,20 @@ start() {
 
     # Build if necessary
     if [ $build -eq 1 ]; then
-        # build
+        # build pdf-sign-repo
+        cd src/pdf-sign-repo/
+        mvn clean install
+        cp target/pdf-sign-repo-1.0.0.amp ../../docker/alfresco/amps
+        cd ../../
+
+
+        # build pdf-sign-share
+        cd src/pdf-sign-share/
+        mvn clean install
+        cp target/pdf-sign-share-1.0.0.amp ../../docker/alfresco/amps
+        cp target/pdf-sign-share-1.0.0.amp ../../docker/share/amps
+        cd ../../
+
         docker compose up --build -d
     fi
 

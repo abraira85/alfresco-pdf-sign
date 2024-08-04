@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <!--  PDF Sign service -->
+    <bean id="org.alfresco.extension.pdf-sign-service"
+        class="org.alfresco.extension.pdfsign.service.PDFSignServiceImpl">
+        <property name="serviceRegistry" ref="ServiceRegistry"/>
+<!--        <property name="createNew" value="${pdfsign.createNew}"/>-->
+        <property name="useSignatureAspect" value="${pdfsign.useSignatureAspect}"/>
+    </bean>
+
+	<bean id="org.alfresco.extension.pdf-sign-action" abstract="true" parent="action-executer">
+		<property name="serviceRegistry">
+			<ref bean="ServiceRegistry" />
+		</property>
+		<property name="PDFSignService">
+			<ref bean="org.alfresco.extension.pdf-sign-service"/>
+		</property>
+		<property name="applicableTypes">
+            <list>
+                <value>{http://www.alfresco.org/model/content/1.0}content</value>
+            </list>
+        </property>
+	</bean>
+
+	<!-- pdfsignature -->
+	<bean id="pdf-signature"
+		class="org.alfresco.extension.pdfsign.repo.action.executer.PDFSignatureActionExecuter"
+		parent="org.alfresco.extension.pdf-sign-action" depends-on="pdfsign-messages">
+		<property name="visibilityConstraint">
+			<ref bean="pdfc-visibility"/>
+		</property>
+		<property name="keyTypeConstraint">
+			<ref bean="pdfc-keytype"/>
+		</property>
+		<property name="positionConstraint">
+			<ref bean="pdfc-position"/>
+		</property>
+		<property name="pageConstraint">
+			<ref bean="pdfc-page"/>
+		</property>
+	</bean>
+
+    <!-- Page count web script -->
+    <bean id="webscript.org.alfresco.extension.pdfsign.pagecount.get" class="org.alfresco.extension.pdfsign.webscripts.GetPageCount" parent="webscript">
+        <property name="serviceRegistry" ref="ServiceRegistry"/>
+    </bean>
+</beans>

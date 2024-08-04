@@ -17,18 +17,32 @@ volumes:
         driver_opts:
             type: tmpfs
             device: tmpfs
+    alfresco_amps:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./docker/alfresco/amps
+    alfresco_share_amps:
+        driver: local
+        driver_opts:
+            o: bind
+            type: none
+            device: ./docker/share/amps
 
 
 ############ SERVICES ############
 services:
     # Alfresco Content Repository Service
     alfresco:
-        image: alfresco/alfresco-content-repository-community:7.4.2
+        build:
+            dockerfile: ./Dockerfile
+            context: ./docker/alfresco
         container_name: alfresco
         restart: always
         mem_limit: 1900m
-        volumes:
-            - ./docker/alfresco-content-repository/extensions/:/usr/local/tomcat/amps/
+        ports:
+            - "8000:8000"
         environment:
             JAVA_TOOL_OPTIONS: >-
                 -Dencryption.keystore.type=JCEKS
@@ -63,6 +77,10 @@ services:
                 -DlocalTransform.core-aio.url=http://${TRANSFORM_CORE_AIO_HOST}:${TRANSFORM_CORE_AIO_PORT}/
                 -XX:MinRAMPercentage=50
                 -XX:MaxRAMPercentage=80
+                -agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n
+        volumes:
+            - alfresco_amps:/usr/local/tomcat/amps
+            - shared-file-store-volume:/usr/local/tomcat/alf_data
         env_file:
             - .env
 
@@ -84,7 +102,9 @@ services:
 
     # Alfresco Share Service
     share:
-        image: docker.io/alfresco/alfresco-share:7.4.2
+        build:
+            dockerfile: ./Dockerfile
+            context: ./docker/share
         container_name: share
         restart: always
         mem_limit: 1g
@@ -98,6 +118,8 @@ services:
                 -Dalfresco.port=${ALFRESCO_PORT}
                 -Dalfresco.context=${ALFRESCO_CONTEXT}
                 -Dalfresco.protocol=${ALFRESCO_PROTOCOL}
+        volumes:
+            - alfresco_share_amps:/usr/local/tomcat/share_amps
         env_file:
             - .env
 
