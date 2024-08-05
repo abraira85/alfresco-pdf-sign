@@ -7,14 +7,6 @@
 			<description>Expose the signature action doclib action UI</description>
 			<version>${project.version}</version>
 			<auto-deploy>true</auto-deploy>
-			<evaluator type="site.module.evaluator">
-				<params>
-					<sites>.*</sites>
-					<applyForNonSites>true</applyForNonSites>
-					<groups>SiteManager,SiteCollaborator,SiteContributor</groups>
-					<groupsRelation>OR</groupsRelation>
-				</params>
-			</evaluator>
 			<configurations>
 				<config evaluator="string-compare" condition="DocLibActions">
 					<actions>

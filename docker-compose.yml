@@ -1,14 +1,29 @@
-# This docker-compose file will spin up an ACS community installation on a local host.
-# It requires at least 6GB of memory available to distribute among containers.
+# ******************************************************************************
 #
-# For performance tuning, increase each container mem_limit and give a percentage of
-# it to the JVM. Use either the -Xms,-Xmx flags or the newly added flags in
-# java 10+: -XX:MaxRAMPercentage and -XX:MinRAMPercentage.
-# More details here:
-# https://www.oracle.com/technetwork/java/javase/10-relnote-issues-4108729.html
+# @file docker-compose.yml
+# @description This Docker Compose file sets up an Alfresco Community Edition
+#              installation on a local host. It includes configurations for
+#              various services like Alfresco Content Repository, Postgres,
+#              Solr, and more. Ensure at least 6GB of memory is available for
+#              container distribution.
 #
-# Using version 2 as 3 does not support resource constraint options
-# (cpu_*, mem_* limits) for non swarm mode in Compose
+# @author Rober de Avila Abraira
+# @version 1.0
+# @date 2024/08/04
+#
+# @copyright © 2024 Rober de Avila Abraira
+#
+# @license Licensed under the Apache License, Version 2.0 (the "License");
+#          you may not use this file except in compliance with the License.
+#          You may obtain a copy of the License at
+#          http://www.apache.org/licenses/LICENSE-2.0
+#          Unless required by applicable law or agreed to in writing, software
+#          distributed under the License is distributed on an "AS IS" BASIS,
+#          WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#          See the License for the specific language governing permissions and
+#          limitations under the License.
+#
+# ******************************************************************************
 
 ############# VOLUMES ############
 volumes:

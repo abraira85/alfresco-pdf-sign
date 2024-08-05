@@ -39,10 +39,4 @@
       	<property name="namespaceService" ref="NamespaceService" />
    </bean>
 
-   	<!-- add the form filter -->
-<!--   	<bean id="pdfsign.actionFormFilter" class="org.alfresco.extension.pdfsign.form.PDFActionFormFilter" parent="baseFormFilter">-->
-<!--   		<property name="filterRegistry" ref="pdfActionFilterRegistry" />-->
-<!--   		<property name="serviceRegistry" ref="ServiceRegistry"/>-->
-<!--   		<property name="repositoryHelper" ref="repositoryHelper" />-->
-<!--   	</bean>-->
 </beans>

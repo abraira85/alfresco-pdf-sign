@@ -1,3 +1,29 @@
+/**
+ * *****************************************************************************
+ *
+ * @file PDFSignServiceImpl.java
+ * @description Implementation of the PDFSignService interface. Provides methods
+ *              for applying digital signatures to PDF documents using iText library.
+ *
+ * @author Rober de Avila Abraira
+ * @version 1.0
+ * @date 2024/08/04
+ *
+ * @copyright © 2024 Rober de Avila Abraira
+ *
+ * @license Licensed under the Apache License, Version 2.0 (the "License");
+ *          you may not use this file except in compliance with the License.
+ *          You may obtain a copy of the License at
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *          Unless required by applicable law or agreed to in writing, software
+ *          distributed under the License is distributed on an "AS IS" BASIS,
+ *          WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *          See the License for the specific language governing permissions and
+ *          limitations under the License.
+ *
+ * *****************************************************************************
+ */
+
 package org.alfresco.extension.pdfsign.service;
 
 import com.itextpdf.text.Rectangle;
@@ -26,10 +52,16 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Implementation of the PDFSignService interface. Provides methods for applying
+ * digital signatures to PDF documents using the iText library.
+ */
 public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignService {
+
     private ServiceRegistry serviceRegistry;
     private NodeService ns;
     private ContentService cs;
@@ -41,46 +73,79 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
     private boolean useSignatureAspect = true;
     private boolean createNew = false;
 
+    private int defaultWidth = 200;
+    private int defaultHeight = 100;
+
+    /**
+     * Loads a KeyStore from the given input stream.
+     *
+     * @param keyType the type of KeyStore (e.g., PKCS12)
+     * @param keyStream the input stream containing the KeyStore data
+     * @param storePassword the password for the KeyStore
+     * @return the loaded KeyStore
+     */
     private KeyStore loadKeyStore(String keyType, InputStream keyStream, String storePassword) {
         try {
-            KeyStore ks = KeyStore.getInstance(keyType);
+            KeyStore ks = null;
+            if (keyType == null || keyType.equalsIgnoreCase(KEY_TYPE_DEFAULT)) {
+                ks = KeyStore.getInstance(KeyStore.getDefaultType());
+            } else if (keyType.equalsIgnoreCase(KEY_TYPE_PKCS12)) {
+                ks = KeyStore.getInstance("pkcs12");
+            }
             ks.load(keyStream, storePassword.toCharArray());
             return ks;
         } catch (Exception e) {
-            System.out.println("Error loading KeyStore: " + e.getMessage());
             throw new AlfrescoRuntimeException("Error loading KeyStore", e);
         }
     }
 
+    /**
+     * Retrieves a PrivateKey from the given KeyStore.
+     *
+     * @param ks the KeyStore
+     * @param alias the alias for the key
+     * @param keyPassword the password for the key
+     * @return the PrivateKey
+     */
     private PrivateKey getPrivateKey(KeyStore ks, String alias, String keyPassword) {
         try {
             Key key = ks.getKey(alias, keyPassword.toCharArray());
             if (key instanceof PrivateKey) {
                 return (PrivateKey) key;
             } else {
-                System.out.println("Key for alias " + alias + " is not a private key");
                 throw new AlfrescoRuntimeException("Key for alias " + alias + " is not a private key");
             }
         } catch (Exception e) {
-            System.out.println("Error retrieving private key: " + e.getMessage());
             throw new AlfrescoRuntimeException("Error retrieving private key", e);
         }
     }
 
+    /**
+     * Retrieves the certificate chain for the given alias from the KeyStore.
+     *
+     * @param ks the KeyStore
+     * @param alias the alias for the certificate chain
+     * @return the certificate chain
+     */
     private Certificate[] getCertificateChain(KeyStore ks, String alias) {
         try {
             Certificate[] certChain = ks.getCertificateChain(alias);
             if (certChain == null) {
-                System.out.println("Certificate chain for alias " + alias + " is null");
                 throw new AlfrescoRuntimeException("Certificate chain for alias " + alias + " is null");
             }
             return certChain;
         } catch (Exception e) {
-            System.out.println("Error retrieving certificate chain: " + e.getMessage());
             throw new AlfrescoRuntimeException("Error retrieving certificate chain", e);
         }
     }
 
+    /**
+     * Applies a digital signature to a PDF document.
+     *
+     * @param targetNodeRef the NodeRef pointing to the PDF document to be signed
+     * @param params a map of parameters required for signing the PDF
+     * @return a NodeRef pointing to the signed PDF
+     */
     @Override
     public NodeRef signPDF(NodeRef targetNodeRef, Map<String, Serializable> params) {
         NodeRef privateKey = (NodeRef) params.get(PARAM_PRIVATE_KEY);
@@ -94,39 +159,25 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         int width = getInteger(params.get(PARAM_WIDTH));
         int pageNumber = getInteger(params.get(PARAM_PAGE));
 
-        System.out.println("privateKey: " + privateKey);
-        System.out.println("location: " + location);
-        System.out.println("position: " + position);
-        System.out.println("reason: " + reason);
-        System.out.println("visibility: " + visibility);
-        System.out.println("keyPassword: " + keyPassword);
-        System.out.println("keyType: " + keyType);
-        System.out.println("height: " + height);
-        System.out.println("width: " + width);
-        System.out.println("pageNumber: " + pageNumber);
+        if (height == 0) {
+            height = defaultHeight;
+        }
+        if (width == 0) {
+            width = defaultWidth;
+        }
 
         boolean appendToExisting = true;
         if (params.get(PARAM_NEW_REVISION) != null) {
-            appendToExisting = Boolean.valueOf(String.valueOf(params.get(PARAM_NEW_REVISION)));
+            appendToExisting = Boolean.parseBoolean(String.valueOf(params.get(PARAM_NEW_REVISION)));
         }
-
-        System.out.println("appendToExisting: " + appendToExisting);
 
         String alias = (String) params.get(PARAM_ALIAS);
         String storePassword = (String) params.get(PARAM_STORE_PASSWORD);
 
-        System.out.println("alias: " + alias);
-        System.out.println("storePassword: " + storePassword);
-
         int locationX = getInteger(params.get(PARAM_LOCATION_X));
         int locationY = getInteger(params.get(PARAM_LOCATION_Y));
 
-        System.out.println("locationX: " + locationX);
-        System.out.println("locationY: " + locationY);
-
         Boolean inplace = Boolean.valueOf(String.valueOf(params.get(PARAM_INPLACE)));
-
-        System.out.println("inplace: " + inplace);
 
         File tempDir = null;
         ContentWriter writer = null;
@@ -138,41 +189,22 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         try {
             ContentReader keyReader = getReader(privateKey);
             ks = loadKeyStore(keyType, keyReader.getContentInputStream(), storePassword);
-            System.out.println("Instancia de KeyStore obtenida");
 
             PrivateKey key = getPrivateKey(ks, alias, keyPassword);
             Certificate[] chain = getCertificateChain(ks, alias);
-            System.out.println("Clave privada y cadena de certificados obtenidos");
 
             ContentReader pdfReader = getReader(targetNodeRef);
             PdfReader reader = new PdfReader(pdfReader.getContentInputStream());
-            System.out.println("Lector de PDF inicializado");
 
-            // If the page number is 0 because it couldn't be parsed or for
-            // some other reason, set it to the first page, which is 1.
-            // If the page number is negative, assume the intent is to "wrap".
-            // For example, -1 would always be the last page.
             int numPages = reader.getNumberOfPages();
-            if (pageNumber < 1 && pageNumber == 0) {
-                pageNumber = 1; // use the first page
-            } else {
-                // page number is negative
-                pageNumber = numPages + 1 + pageNumber;
-                if (pageNumber <= 0) pageNumber = 1;
-            }
-
-            // if the page number specified is more than the num of pages,
-            // use the last page
-            if (pageNumber > numPages) {
+            if (pageNumber < 1 || pageNumber > numPages) {
                 pageNumber = numPages;
             }
-            System.out.println("Número de página calculado: " + pageNumber);
 
             File alfTempDir = TempFileProvider.getTempDir();
             tempDir = new File(alfTempDir.getPath() + File.separatorChar + targetNodeRef.getId());
             tempDir.mkdir();
             File file = new File(tempDir, ffs.getFileInfo(targetNodeRef).getName());
-            System.out.println("Directorio y archivo temporales creados");
 
             fout = new FileOutputStream(file);
 
@@ -181,52 +213,44 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
             } else {
                 stamper = PdfStamper.createSignature(reader, fout, '\0');
             }
-            System.out.println("PdfStamper creado");
 
             PdfSignatureAppearance sap = stamper.getSignatureAppearance();
             sap.setReason(reason);
             sap.setLocation(location);
 
             if (visibility.equalsIgnoreCase(VISIBILITY_VISIBLE)) {
-                if (position != null && !position.trim().equalsIgnoreCase("") && !position.trim().equalsIgnoreCase(POSITION_MANUAL)) {
+                if (position != null && !position.trim().isEmpty() && !position.trim().equalsIgnoreCase(POSITION_MANUAL)) {
                     Rectangle pageRect = reader.getPageSizeWithRotation(pageNumber);
                     sap.setVisibleSignature(positionSignature(position, pageRect, width, height), pageNumber, null);
                 } else {
                     sap.setVisibleSignature(new Rectangle(locationX, locationY, locationX + width, locationY - height), pageNumber, null);
                 }
             }
-            System.out.println("Apariencia de firma configurada");
 
             ExternalDigest digest = new BouncyCastleDigest();
             ExternalSignature signature = new PrivateKeySignature(key, DigestAlgorithms.SHA256, "BC");
 
             MakeSignature.signDetached(sap, digest, signature, chain, null, null, null, 0, MakeSignature.CryptoStandard.CMS);
-            System.out.println("Documento firmado");
 
             String fileName = getFilename(params, targetNodeRef);
 
             destinationNode = createDestinationNode(fileName, (NodeRef) params.get(PARAM_DESTINATION_FOLDER), targetNodeRef, inplace);
             writer = cs.getWriter(destinationNode, ContentModel.PROP_CONTENT, true);
-            System.out.println("Nodo de destino creado");
 
             writer.setEncoding(pdfReader.getEncoding());
             writer.setMimetype(FILE_MIMETYPE);
             writer.putContent(file);
-            System.out.println("Contenido escrito en el nodo de destino");
 
             file.delete();
-            System.out.println("Archivo temporal eliminado");
 
             if (useSignatureAspect) {
                 ns.addAspect(destinationNode, PDFSignModel.ASPECT_SIGNED, new HashMap<QName, Serializable>());
                 ns.setProperty(destinationNode, PDFSignModel.PROP_REASON, reason);
                 ns.setProperty(destinationNode, PDFSignModel.PROP_LOCATION, location);
-                ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNATUREDATE, new java.util.Date());
+                ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNATUREDATE, new Date());
                 ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNEDBY, AuthenticationUtil.getRunAsUser());
-                System.out.println("Aspecto de firma añadido al nodo de destino");
             }
         } catch (Exception e) {
-            System.out.println("Exception: " + e.getMessage());
             e.printStackTrace();
             throw new AlfrescoRuntimeException(e.getMessage(), e);
         } finally {
@@ -234,7 +258,6 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
                 try {
                     fout.close();
                 } catch (IOException e) {
-                    System.out.println("Excepción al cerrar FileOutputStream: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -245,7 +268,6 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
                     }
                     tempDir.delete();
                 } catch (Exception e) {
-                    System.out.println("Excepción al eliminar directorio temporal: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -253,7 +275,6 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
                 try {
                     stamper.close();
                 } catch (Exception e) {
-                    System.out.println("Excepción al cerrar PdfStamper: " + e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -262,6 +283,12 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         return destinationNode;
     }
 
+    /**
+     * Retrieves a ContentReader for the specified node.
+     *
+     * @param nodeRef the NodeRef pointing to the content node
+     * @return the ContentReader
+     */
     private ContentReader getReader(NodeRef nodeRef) {
         if (!ns.exists(nodeRef)) {
             throw new AlfrescoRuntimeException("NodeRef: " + nodeRef + " does not exist");
@@ -280,6 +307,15 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         return contentReader;
     }
 
+    /**
+     * Creates or retrieves a destination node for the signed PDF.
+     *
+     * @param filename the name of the destination file
+     * @param destinationParent the parent folder for the destination node
+     * @param target the original node
+     * @param inplace whether to overwrite the original node
+     * @return the NodeRef of the destination node
+     */
     private NodeRef createDestinationNode(String filename, NodeRef destinationParent, NodeRef target, boolean inplace) {
         NodeRef destinationNode;
 
@@ -302,6 +338,12 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         return destinationNode;
     }
 
+    /**
+     * Converts a Serializable value to an integer.
+     *
+     * @param val the Serializable value
+     * @return the integer value, or 0 if the conversion fails
+     */
     private int getInteger(Serializable val) {
         if (val == null) {
             return 0;
@@ -313,6 +355,13 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         }
     }
 
+    /**
+     * Generates a filename for the signed PDF based on parameters.
+     *
+     * @param params the parameters map
+     * @param targetNodeRef the NodeRef of the target node
+     * @return the filename
+     */
     private String getFilename(Map<String, Serializable> params, NodeRef targetNodeRef) {
         Serializable providedName = params.get(PARAM_DESTINATION_NAME);
         String fileName;
@@ -327,6 +376,15 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         return fileName;
     }
 
+    /**
+     * Calculates the position and dimensions for the signature based on the specified position.
+     *
+     * @param position the position of the signature
+     * @param pageRect the rectangle representing the page size
+     * @param width the width of the signature
+     * @param height the height of the signature
+     * @return the Rectangle representing the position of the signature
+     */
     private Rectangle positionSignature(String position, Rectangle pageRect, int width, int height) {
         float pageHeight = pageRect.getHeight();
         float pageWidth = pageRect.getWidth();
@@ -354,6 +412,11 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         return r;
     }
 
+    /**
+     * Sets the ServiceRegistry used by this service.
+     *
+     * @param serviceRegistry the ServiceRegistry to set
+     */
     public void setServiceRegistry(ServiceRegistry serviceRegistry) {
         this.serviceRegistry = serviceRegistry;
         ns = serviceRegistry.getNodeService();
@@ -364,6 +427,11 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         as = serviceRegistry.getAuthenticationService();
     }
 
+    /**
+     * Sets whether to use the signature aspect.
+     *
+     * @param useSignatureAspect true to use the signature aspect, false otherwise
+     */
     public void setUseSignatureAspect(boolean useSignatureAspect) {
         this.useSignatureAspect = useSignatureAspect;
     }

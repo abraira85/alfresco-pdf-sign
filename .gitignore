@@ -1,3 +1,4 @@
 src/pdf-sign-repo/target
 src/pdf-sign-share/target
 .idea/
+.vscode/

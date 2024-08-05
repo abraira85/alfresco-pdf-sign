@@ -1,5 +1,32 @@
 #!/bin/bash
 
+# ******************************************************************************
+#
+# @file script.sh
+# @description This script provides utility commands for managing Docker containers
+#              with Docker Compose. It includes commands for starting, stopping,
+#              restarting, and viewing logs of containers, as well as building and
+#              testing the project.
+#
+# @author Rober de Avila Abraira
+# @version 1.0
+# @date 2024/08/04
+#
+# @copyright © 2024 Rober de Avila Abraira
+#
+# @license Licensed under the Apache License, Version 2.0 (the "License");
+#          you may not use this file except in compliance with the License.
+#          You may obtain a copy of the License at
+#          http://www.apache.org/licenses/LICENSE-2.0
+#          Unless required by applicable law or agreed to in writing, software
+#          distributed under the License is distributed on an "AS IS" BASIS,
+#          WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#          See the License for the specific language governing permissions and
+#          limitations under the License.
+#
+# ******************************************************************************
+
+# Check if M2_HOME is set and assign the appropriate Maven executable
 if [ -z "${M2_HOME}" ]; then
   export MVN_EXEC="mvn"
 else
@@ -7,6 +34,7 @@ else
 fi
 
 # Function to colorize text
+# Usage: colorize color text
 colorize() {
     local color="$1"
     local text="$2"
@@ -26,6 +54,7 @@ colorize() {
     esac
 }
 
+# Function to display the status of Docker containers
 status() {
     # Function to calculate the maximum length of each column
     max_length() {
@@ -77,7 +106,7 @@ status() {
             state="stopped"
         fi
 
-        # Check if the container is in the services array
+        # Colorize the state based on its value
         if [ "$state" = "running" ]; then
             state=$(colorize green "$state")
         elif [ "$state" = "paused" ]; then
@@ -94,6 +123,8 @@ status() {
     printf "%s\n" "└$(printf '─%.0s' $(seq 1 $total_width))┘"
 }
 
+# Function to start Docker containers
+# Usage: start [options] [service_numbers]
 start() {
     local build=0
     local verbose=0
@@ -126,14 +157,13 @@ start() {
 
     # Build if necessary
     if [ $build -eq 1 ]; then
-        # build pdf-sign-repo
+        # Build pdf-sign-repo
         cd src/pdf-sign-repo/
         mvn clean install
         cp target/pdf-sign-repo-1.0.0.amp ../../docker/alfresco/amps
         cd ../../
 
-
-        # build pdf-sign-share
+        # Build pdf-sign-share
         cd src/pdf-sign-share/
         mvn clean install
         cp target/pdf-sign-share-1.0.0.amp ../../docker/alfresco/amps
@@ -143,6 +173,7 @@ start() {
         docker compose up --build -d
     fi
 
+    # Start specified services or all services
     if [ ${#services_to_start[@]} -gt 0 ]; then
         for index in "${services_to_start[@]}"; do
             # Ensure index is within valid range
@@ -164,6 +195,8 @@ start() {
     fi
 }
 
+# Function to stop Docker containers
+# Usage: stop [options] [service_numbers]
 stop() {
     local purge=0
     local services_to_stop=()
@@ -189,6 +222,7 @@ stop() {
 
     service_num=$(echo "$container_info" | wc -l)
 
+    # Stop containers or remove volumes if purge option is used
     if [ $purge -eq 1 ]; then
         docker compose down -v
     elif [ ${#services_to_stop[@]} -gt 0 ]; then
@@ -197,7 +231,6 @@ stop() {
             if [ "$index" -ge 1 ] && [ "$index" -le "$service_num" ]; then
                 # Get the container ID corresponding to the index
                 container_id=$(echo "$container_info" | sed -n "${index}p" | awk '{print $1}')
-                echo ${container_id}
                 docker compose stop $container_id
             else
                 echo "Invalid index: $index"
@@ -208,6 +241,8 @@ stop() {
     fi
 }
 
+# Function to restart Docker containers
+# Usage: restart [service_numbers]
 restart() {
     local services_to_restart=()
 
@@ -230,6 +265,7 @@ restart() {
 
     service_num=$(echo "$container_info" | wc -l)
 
+    # Restart specified services or all services
     if [ ${#services_to_restart[@]} -gt 0 ]; then
         for index in "${services_to_restart[@]}"; do
             # Ensure index is within valid range
@@ -246,10 +282,13 @@ restart() {
     fi
 }
 
+# Function to build the project using Maven
 build() {
     $MVN_EXEC clean install -DskipTests=true
 }
 
+# Function to tail the logs of Docker containers
+# Usage: tail [service_numbers]
 tail() {
     local services_to_tail=()
 
@@ -272,6 +311,7 @@ tail() {
 
     service_num=$(echo "$container_info" | wc -l)
 
+    # Tail logs for specified containers or all containers
     if [ ${#services_to_tail[@]} -gt 0 ]; then
         for index in "${services_to_tail[@]}"; do
             # Ensure index is within valid range
@@ -288,6 +328,8 @@ tail() {
     fi
 }
 
+# Function to run tests using Maven
+# Usage: test [options]
 test() {
     local build=0
     while [ "$1" != "" ]; do
@@ -299,12 +341,14 @@ test() {
         shift
     done
 
+    # Build if necessary
     if [ $build -eq 1 ]; then
         build
     fi
     $MVN_EXEC verify
 }
 
+# Function to display help message
 help() {
     echo "Usage: $0 {command} [options] [service_numbers]"
     echo
@@ -343,6 +387,7 @@ help() {
     echo " "
 }
 
+# Command dispatch based on the first argument
 case "$1" in
   start)
     shift
@@ -372,4 +417,5 @@ case "$1" in
     ;;
   *)
     help
+    ;;
 esac
