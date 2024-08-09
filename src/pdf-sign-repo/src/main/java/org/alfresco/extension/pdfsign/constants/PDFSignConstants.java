@@ -73,9 +73,6 @@ public abstract class PDFSignConstants
     /** Specifies the type of key used for signing. */
     public static final String PARAM_KEY_TYPE          				= "key-type";
 
-    /** Specifies the alias of the private key. */
-    public static final String PARAM_ALIAS              			= "alias";
-
     /** Specifies the password for the key store. */
     public static final String PARAM_STORE_PASSWORD     			= "store-password";
 

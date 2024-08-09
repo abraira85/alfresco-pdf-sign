@@ -87,7 +87,6 @@ public class PDFSignatureActionExecuter extends BasePDFStampActionExecuter {
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_WIDTH, DataTypeDefinition.INT, false, getParamDisplayLabel(PDFSignConstants.PARAM_WIDTH)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_HEIGHT, DataTypeDefinition.INT, false, getParamDisplayLabel(PDFSignConstants.PARAM_HEIGHT)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_KEY_TYPE, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PDFSignConstants.PARAM_KEY_TYPE), false, "pdfc-keytype"));
-        paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_ALIAS, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PDFSignConstants.PARAM_ALIAS)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_STORE_PASSWORD, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PDFSignConstants.PARAM_STORE_PASSWORD)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_DESTINATION_NAME, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PDFSignConstants.PARAM_DESTINATION_NAME)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_NEW_REVISION, DataTypeDefinition.BOOLEAN, false, getParamDisplayLabel(PDFSignConstants.PARAM_NEW_REVISION), false));

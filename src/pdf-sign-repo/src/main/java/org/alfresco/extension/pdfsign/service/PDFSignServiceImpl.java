@@ -52,9 +52,13 @@ import java.security.Key;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
+import javax.security.auth.x500.X500Principal;
+import java.util.Map;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Enumeration;
+
 
 /**
  * Implementation of the PDFSignService interface. Provides methods for applying
@@ -75,6 +79,7 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
 
     private int defaultWidth = 200;
     private int defaultHeight = 100;
+
 
     /**
      * Loads a KeyStore from the given input stream.
@@ -140,6 +145,75 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
     }
 
     /**
+     * Retrieves the CN (Common Name) from the KeyStore's certificate subject.
+     *
+     * @param ks the KeyStore
+     * @return the CN (Common Name) or null if not found
+     */
+    private String getFriendlyName(KeyStore ks) {
+        try {
+            Enumeration<String> aliases = ks.aliases();
+            while (aliases.hasMoreElements()) {
+                String alias = aliases.nextElement();
+                Certificate[] certChain = ks.getCertificateChain(alias);
+                if (certChain != null && certChain.length > 0) {
+                    X509Certificate cert = (X509Certificate) certChain[0];
+                    X500Principal principal = cert.getSubjectX500Principal();
+                    String dn = principal.getName();
+
+                    // Extract CN value from DN
+                    return extractCNFromDN(dn);
+                }
+            }
+        } catch (Exception e) {
+            throw new AlfrescoRuntimeException("Error retrieving friendly name", e);
+        }
+        return null;
+    }
+
+    /**
+     * Extracts the CN (Common Name) from a DN (Distinguished Name).
+     *
+     * @param dn the Distinguished Name
+     * @return the CN (Common Name) or null if not found
+     */
+    private String extractCNFromDN(String dn) {
+        // Split the DN by commas to get individual components
+        String[] dnComponents = dn.split(",");
+
+        // Loop through the components to find the CN
+        for (String component : dnComponents) {
+            String[] keyValue = component.split("=", 2); // Split only once to handle cases with '=' in the value
+            if (keyValue.length == 2 && "CN".equalsIgnoreCase(keyValue[0].trim())) {
+                // Return the value of CN, removing any leading/trailing spaces
+                String cnValue = keyValue[1].trim();
+                // Return only the part before the first comma if it exists
+                int commaIndex = cnValue.indexOf(',');
+                if (commaIndex != -1) {
+                    return cnValue.substring(0, commaIndex).trim();
+                }
+                return cnValue;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Retrieves the alias of the first entry in the provided KeyStore.
+     *
+     * @param ks the KeyStore object from which to retrieve the alias
+     * @return the alias of the first entry in the KeyStore, or {@code null} if the KeyStore is empty
+     * @throws Exception if an error occurs while accessing the KeyStore
+     */
+    private static String getAlias(KeyStore ks) throws Exception {
+        Enumeration<String> aliases = ks.aliases();
+        if (aliases.hasMoreElements()) {
+            return aliases.nextElement();
+        }
+        return null;
+    }
+
+    /**
      * Applies a digital signature to a PDF document.
      *
      * @param targetNodeRef the NodeRef pointing to the PDF document to be signed
@@ -169,7 +243,6 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
             appendToExisting = Boolean.parseBoolean(String.valueOf(params.get(PARAM_NEW_REVISION)));
         }
 
-        String alias = (String) params.get(PARAM_ALIAS);
         String storePassword = (String) params.get(PARAM_STORE_PASSWORD);
 
         int locationX = getInteger(params.get(PARAM_LOCATION_X));
@@ -187,6 +260,15 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         try {
             ContentReader keyReader = getReader(privateKey);
             ks = loadKeyStore(keyType, keyReader.getContentInputStream(), storePassword);
+
+            // Obtener el friendlyName del KeyStore
+            String friendlyName = getFriendlyName(ks);
+
+            if (friendlyName == null) {
+                throw new AlfrescoRuntimeException("friendlyName was not found in the KeyStore");
+            }
+
+            String alias = getAlias(ks);
 
             PrivateKey key = getPrivateKey(ks, alias, keyPassword);
             Certificate[] chain = getCertificateChain(ks, alias);
