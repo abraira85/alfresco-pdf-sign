@@ -61,12 +61,6 @@ public abstract class PDFSignConstants
     /** Specifies the visibility of the signature. */
     public static final String PARAM_VISIBILITY         			= "visibility";
 
-    /** Specifies the location of the signature. */
-    public static final String PARAM_LOCATION           			= "location";
-
-    /** Specifies the reason for the signature. */
-    public static final String PARAM_REASON             			= "reason";
-
     /** Specifies the password for the private key. */
     public static final String PARAM_KEY_PASSWORD       			= "key-password";
 

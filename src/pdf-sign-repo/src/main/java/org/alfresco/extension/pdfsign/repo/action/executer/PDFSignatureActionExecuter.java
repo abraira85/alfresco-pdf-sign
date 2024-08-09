@@ -83,8 +83,6 @@ public class PDFSignatureActionExecuter extends BasePDFStampActionExecuter {
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_DESTINATION_FOLDER, DataTypeDefinition.NODE_REF, false, getParamDisplayLabel(PDFSignConstants.PARAM_DESTINATION_FOLDER)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_PRIVATE_KEY, DataTypeDefinition.NODE_REF, true, getParamDisplayLabel(PDFSignConstants.PARAM_PRIVATE_KEY)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_VISIBILITY, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PDFSignConstants.PARAM_VISIBILITY), false, "pdfc-visibility"));
-        paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_LOCATION, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PDFSignConstants.PARAM_LOCATION)));
-        paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_REASON, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PDFSignConstants.PARAM_REASON)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_KEY_PASSWORD, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PDFSignConstants.PARAM_KEY_PASSWORD)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_WIDTH, DataTypeDefinition.INT, false, getParamDisplayLabel(PDFSignConstants.PARAM_WIDTH)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_HEIGHT, DataTypeDefinition.INT, false, getParamDisplayLabel(PDFSignConstants.PARAM_HEIGHT)));

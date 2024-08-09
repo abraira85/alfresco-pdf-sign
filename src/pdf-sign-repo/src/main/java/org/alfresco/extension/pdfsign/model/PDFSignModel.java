@@ -40,12 +40,6 @@ public interface PDFSignModel {
     /** QName for the signature date property. */
     static final QName PROP_SIGNATUREDATE = QName.createQName(PDFSIGN_MODEL_1_0_URI, "signaturedate");
 
-    /** QName for the reason property. */
-    static final QName PROP_REASON = QName.createQName(PDFSIGN_MODEL_1_0_URI, "reason");
-
-    /** QName for the location property. */
-    static final QName PROP_LOCATION = QName.createQName(PDFSIGN_MODEL_1_0_URI, "location");
-
     /** QName for the signed by property. */
     static final QName PROP_SIGNEDBY = QName.createQName(PDFSIGN_MODEL_1_0_URI, "signedby");
 }

@@ -149,9 +149,7 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
     @Override
     public NodeRef signPDF(NodeRef targetNodeRef, Map<String, Serializable> params) {
         NodeRef privateKey = (NodeRef) params.get(PARAM_PRIVATE_KEY);
-        String location = (String) params.get(PARAM_LOCATION);
         String position = (String) params.get(PARAM_POSITION);
-        String reason = (String) params.get(PARAM_REASON);
         String visibility = (String) params.get(PARAM_VISIBILITY);
         String keyPassword = (String) params.get(PARAM_KEY_PASSWORD);
         String keyType = (String) params.get(PARAM_KEY_TYPE);
@@ -215,8 +213,6 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
             }
 
             PdfSignatureAppearance sap = stamper.getSignatureAppearance();
-            sap.setReason(reason);
-            sap.setLocation(location);
 
             if (visibility.equalsIgnoreCase(VISIBILITY_VISIBLE)) {
                 if (position != null && !position.trim().isEmpty() && !position.trim().equalsIgnoreCase(POSITION_MANUAL)) {
@@ -245,8 +241,6 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
 
             if (useSignatureAspect) {
                 ns.addAspect(destinationNode, PDFSignModel.ASPECT_SIGNED, new HashMap<QName, Serializable>());
-                ns.setProperty(destinationNode, PDFSignModel.PROP_REASON, reason);
-                ns.setProperty(destinationNode, PDFSignModel.PROP_LOCATION, location);
                 ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNATUREDATE, new Date());
                 ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNEDBY, AuthenticationUtil.getRunAsUser());
             }
