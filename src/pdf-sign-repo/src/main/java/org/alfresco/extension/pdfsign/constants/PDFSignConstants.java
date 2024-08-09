@@ -70,9 +70,6 @@ public abstract class PDFSignConstants
     /** Specifies the height of the signature. */
     public static final String PARAM_HEIGHT             			= "height";
 
-    /** Specifies the type of key used for signing. */
-    public static final String PARAM_KEY_TYPE          				= "key-type";
-
     /** Specifies the password for the key store. */
     public static final String PARAM_STORE_PASSWORD     			= "store-password";
 
@@ -81,12 +78,6 @@ public abstract class PDFSignConstants
 
     /** Constant for visible signature visibility. */
     public static final String VISIBILITY_VISIBLE       			= "visible";
-
-    /** Constant for PKCS12 key type. */
-    public static final String KEY_TYPE_PKCS12          			= "pkcs12";
-
-    /** Constant for default key type. */
-    public static final String KEY_TYPE_DEFAULT         			= "default";
 
     /** Constant for center position of the signature. */
     public static final String POSITION_CENTER      				= "center";

@@ -50,19 +50,9 @@ public class PDFSignatureActionExecuter extends BasePDFStampActionExecuter {
 
     /** Constraints */
     public static HashMap<String, String> visibilityConstraint = new HashMap<String, String>();
-    public static HashMap<String, String> keyTypeConstraint = new HashMap<String, String>();
 
     /** Action constants */
     public static final String NAME = "pdf-signature";
-
-    /**
-     * Sets the key type constraint.
-     *
-     * @param mc the map constraint containing allowable values for key types
-     */
-    public void setKeyTypeConstraint(MapConstraint mc) {
-        keyTypeConstraint.putAll(mc.getAllowableValues());
-    }
 
     /**
      * Sets the visibility constraint.
@@ -86,7 +76,6 @@ public class PDFSignatureActionExecuter extends BasePDFStampActionExecuter {
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_KEY_PASSWORD, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PDFSignConstants.PARAM_KEY_PASSWORD)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_WIDTH, DataTypeDefinition.INT, false, getParamDisplayLabel(PDFSignConstants.PARAM_WIDTH)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_HEIGHT, DataTypeDefinition.INT, false, getParamDisplayLabel(PDFSignConstants.PARAM_HEIGHT)));
-        paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_KEY_TYPE, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PDFSignConstants.PARAM_KEY_TYPE), false, "pdfc-keytype"));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_STORE_PASSWORD, DataTypeDefinition.TEXT, true, getParamDisplayLabel(PDFSignConstants.PARAM_STORE_PASSWORD)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_DESTINATION_NAME, DataTypeDefinition.TEXT, false, getParamDisplayLabel(PDFSignConstants.PARAM_DESTINATION_NAME)));
         paramList.add(new ParameterDefinitionImpl(PDFSignConstants.PARAM_NEW_REVISION, DataTypeDefinition.BOOLEAN, false, getParamDisplayLabel(PDFSignConstants.PARAM_NEW_REVISION), false));

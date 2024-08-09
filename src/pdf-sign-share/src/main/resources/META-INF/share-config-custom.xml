@@ -94,7 +94,6 @@
         			<show id="destination-name"/>
         			<show id="destination-folder"/>
         			<show id="private-key"/>
-        			<show id="key-type"/>
         			<show id="key-password"/>
         			<show id="store-password"/>
         			<show id="visibility"/>

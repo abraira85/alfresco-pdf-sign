@@ -84,19 +84,13 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
     /**
      * Loads a KeyStore from the given input stream.
      *
-     * @param keyType the type of KeyStore (e.g., PKCS12)
      * @param keyStream the input stream containing the KeyStore data
      * @param storePassword the password for the KeyStore
      * @return the loaded KeyStore
      */
-    private KeyStore loadKeyStore(String keyType, InputStream keyStream, String storePassword) {
+    private KeyStore loadKeyStore(InputStream keyStream, String storePassword) {
         try {
-            KeyStore ks = null;
-            if (keyType == null || keyType.equalsIgnoreCase(KEY_TYPE_DEFAULT)) {
-                ks = KeyStore.getInstance(KeyStore.getDefaultType());
-            } else if (keyType.equalsIgnoreCase(KEY_TYPE_PKCS12)) {
-                ks = KeyStore.getInstance("pkcs12");
-            }
+            KeyStore ks = KeyStore.getInstance("pkcs12");
             ks.load(keyStream, storePassword.toCharArray());
             return ks;
         } catch (Exception e) {
@@ -226,7 +220,6 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         String position = (String) params.get(PARAM_POSITION);
         String visibility = (String) params.get(PARAM_VISIBILITY);
         String keyPassword = (String) params.get(PARAM_KEY_PASSWORD);
-        String keyType = (String) params.get(PARAM_KEY_TYPE);
         int height = getInteger(params.get(PARAM_HEIGHT));
         int width = getInteger(params.get(PARAM_WIDTH));
         int pageNumber = getInteger(params.get(PARAM_PAGE));
@@ -259,7 +252,7 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
 
         try {
             ContentReader keyReader = getReader(privateKey);
-            ks = loadKeyStore(keyType, keyReader.getContentInputStream(), storePassword);
+            ks = loadKeyStore(keyReader.getContentInputStream(), storePassword);
 
             // Obtener el friendlyName del KeyStore
             String friendlyName = getFriendlyName(ks);

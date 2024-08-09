@@ -33,9 +33,6 @@
 		<property name="visibilityConstraint">
 			<ref bean="pdfc-visibility"/>
 		</property>
-		<property name="keyTypeConstraint">
-			<ref bean="pdfc-keytype"/>
-		</property>
 		<property name="positionConstraint">
 			<ref bean="pdfc-position"/>
 		</property>
