@@ -110,6 +110,26 @@
                         	<control-param name="hideProperties">assoc_destination-folder-cntrl,prop_destination-name</control-param>
                         </control>
                 	</field>
+                    <field id="destination-name">
+                        <control template="/org/alfresco/pdfsign/components/form/controls/hiddenTextField.ftl">
+                            <!-- Otros parámetros si es necesario -->
+                        </control>
+                    </field>
+<!--                    <field id="destination-folder">-->
+<!--                        <control template="/org/alfresco/pdfsign/components/form/controls/fileFinderField.ftl">-->
+<!--                            &lt;!&ndash; Otros parámetros si es necesario &ndash;&gt;-->
+<!--                        </control>-->
+<!--                    </field>-->
+                    <field id="key-password">
+                        <control template="/org/alfresco/pdfsign/components/form/controls/passwordTextField.ftl">
+                            <!-- Otros parámetros si es necesario -->
+                        </control>
+                    </field>
+                    <field id="store-password">
+                        <control template="/org/alfresco/pdfsign/components/form/controls/passwordTextField.ftl">
+                            <!-- Otros parámetros si es necesario -->
+                        </control>
+                    </field>
                 	<field id="visibility">
                     	<control template="/org/alfresco/pdfsign/components/form/controls/dependentSelect.ftl">
                     		<control-param name="showSelectValues">visible:prop_page,prop_position,prop_location-x,prop_location-y,prop_width,prop_height</control-param>

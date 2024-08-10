@@ -325,18 +325,25 @@ PDFSign.Util = {};
 
 (function() {
     /**
-     * Hides dependent controls based on the state of a checkbox.
+     * YUI Library aliases
+     */
+    var Dom = YAHOO.util.Dom,
+        Event = YAHOO.util.Event,
+        Selector = YAHOO.util.Selector;
+
+    /**
+     * Shows dependent controls based on the state of a checkbox.
      *
      * @param {String} fieldHtmlId The HTML id of the checkbox
      * @param {String} htmlIdPrefix The HTML id prefix for dependent fields
-     * @method HideDependentControls
+     * @method ShowDependentControls
      */
-    PDFSign.Util.HideDependentControls = function(fieldHtmlId, htmlIdPrefix) {
+    PDFSign.Util.ShowDependentControls = function(fieldHtmlId, htmlIdPrefix) {
         var value = YAHOO.util.Dom.get(fieldHtmlId + "-entry").checked;
         YAHOO.util.Dom.get(fieldHtmlId).value = value;
         var controls = YAHOO.util.Dom.get(fieldHtmlId + "-tohide").value.split(",");
 
-        for (index in controls) {
+        for (var index in controls) {
             var control = YAHOO.util.Dom.get((htmlIdPrefix + "_" + controls[index]));
             var container = control.parentElement;
             if (value) {
