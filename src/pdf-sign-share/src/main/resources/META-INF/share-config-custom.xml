@@ -153,4 +153,5 @@
             <css src="pdfsign/components/doclib/custom-style.css" />
 		</dependencies>
 	</config>
+
 </alfresco-config>

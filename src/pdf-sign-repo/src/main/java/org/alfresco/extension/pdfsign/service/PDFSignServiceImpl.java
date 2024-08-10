@@ -3,24 +3,21 @@
  *
  * @file PDFSignServiceImpl.java
  * @description Implementation of the PDFSignService interface. Provides methods
- *              for applying digital signatures to PDF documents using iText library.
- *
+ * for applying digital signatures to PDF documents using iText library.
  * @author Rober de Avila Abraira
  * @version 1.0
  * @date 2024/08/04
- *
  * @copyright © 2024 Rober de Avila Abraira
- *
  * @license Licensed under the Apache License, Version 2.0 (the "License");
- *          you may not use this file except in compliance with the License.
- *          You may obtain a copy of the License at
- *          http://www.apache.org/licenses/LICENSE-2.0
- *          Unless required by applicable law or agreed to in writing, software
- *          distributed under the License is distributed on an "AS IS" BASIS,
- *          WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *          See the License for the specific language governing permissions and
- *          limitations under the License.
- *
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * <p>
  * *****************************************************************************
  */
 
@@ -80,6 +77,20 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
     private int defaultWidth = 200;
     private int defaultHeight = 100;
 
+    /**
+     * Retrieves the alias of the first entry in the provided KeyStore.
+     *
+     * @param ks the KeyStore object from which to retrieve the alias
+     * @return the alias of the first entry in the KeyStore, or {@code null} if the KeyStore is empty
+     * @throws Exception if an error occurs while accessing the KeyStore
+     */
+    private static String getAlias(KeyStore ks) throws Exception {
+        Enumeration<String> aliases = ks.aliases();
+        if (aliases.hasMoreElements()) {
+            return aliases.nextElement();
+        }
+        return null;
+    }
 
     /**
      * Loads a KeyStore from the given input stream.
@@ -193,21 +204,6 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
     }
 
     /**
-     * Retrieves the alias of the first entry in the provided KeyStore.
-     *
-     * @param ks the KeyStore object from which to retrieve the alias
-     * @return the alias of the first entry in the KeyStore, or {@code null} if the KeyStore is empty
-     * @throws Exception if an error occurs while accessing the KeyStore
-     */
-    private static String getAlias(KeyStore ks) throws Exception {
-        Enumeration<String> aliases = ks.aliases();
-        if (aliases.hasMoreElements()) {
-            return aliases.nextElement();
-        }
-        return null;
-    }
-
-    /**
      * Applies a digital signature to a PDF document.
      *
      * @param targetNodeRef the NodeRef pointing to the PDF document to be signed
@@ -220,9 +216,13 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
         String position = (String) params.get(PARAM_POSITION);
         String visibility = (String) params.get(PARAM_VISIBILITY);
         String keyPassword = (String) params.get(PARAM_KEY_PASSWORD);
-        int height = getInteger(params.get(PARAM_HEIGHT));
         int width = getInteger(params.get(PARAM_WIDTH));
+        int height = getInteger(params.get(PARAM_HEIGHT));
         int pageNumber = getInteger(params.get(PARAM_PAGE));
+        String pageNumberParam = (String) params.get(PARAM_PAGE);
+        boolean signAllPages = "all".equalsIgnoreCase(pageNumberParam);
+        boolean signLastPage = "last".equalsIgnoreCase(pageNumberParam);
+        int specificPageNumber = signAllPages || signLastPage ? -1 : getInteger(pageNumberParam);
 
         if (height == 0) {
             height = defaultHeight;
@@ -245,16 +245,17 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
 
         File tempDir = null;
         ContentWriter writer = null;
-        KeyStore ks = null;
+
         NodeRef destinationNode = null;
         PdfStamper stamper = null;
         FileOutputStream fout = null;
 
         try {
+            KeyStore ks = null;
+
             ContentReader keyReader = getReader(privateKey);
             ks = loadKeyStore(keyReader.getContentInputStream(), storePassword);
 
-            // Obtener el friendlyName del KeyStore
             String friendlyName = getFriendlyName(ks);
 
             if (friendlyName == null) {
@@ -266,87 +267,176 @@ public class PDFSignServiceImpl extends PDFSignConstants implements PDFSignServi
             PrivateKey key = getPrivateKey(ks, alias, keyPassword);
             Certificate[] chain = getCertificateChain(ks, alias);
 
-            ContentReader pdfReader = getReader(targetNodeRef);
-            PdfReader reader = new PdfReader(pdfReader.getContentInputStream());
+            ContentReader pdfReaderNumPage = getReader(targetNodeRef);
+            PdfReader readerNumPage = new PdfReader(pdfReaderNumPage.getContentInputStream());
 
-            int numPages = reader.getNumberOfPages();
-            if (pageNumber < 1 || pageNumber > numPages) {
+            int numPages = readerNumPage.getNumberOfPages();
+            if (pageNumber > numPages) {
                 pageNumber = numPages;
             }
 
-            File alfTempDir = TempFileProvider.getTempDir();
-            tempDir = new File(alfTempDir.getPath() + File.separatorChar + targetNodeRef.getId());
-            tempDir.mkdir();
-            File file = new File(tempDir, ffs.getFileInfo(targetNodeRef).getName());
+            if (signAllPages) {
+                for (int page = 1; page <= numPages; page++) {
+                    ContentReader pdfReader = getReader(targetNodeRef);
+                    PdfReader reader = new PdfReader(pdfReader.getContentInputStream());
 
-            fout = new FileOutputStream(file);
+                    File alfTempDir = TempFileProvider.getTempDir();
+                    tempDir = new File(alfTempDir.getPath() + File.separatorChar + targetNodeRef.getId());
+                    tempDir.mkdir();
+                    File file = new File(tempDir, ffs.getFileInfo(targetNodeRef).getName());
 
-            if (appendToExisting) {
-                stamper = PdfStamper.createSignature(reader, fout, '\0', tempDir, true);
-            } else {
-                stamper = PdfStamper.createSignature(reader, fout, '\0');
-            }
+                    fout = new FileOutputStream(file);
 
-            PdfSignatureAppearance sap = stamper.getSignatureAppearance();
+                    if (appendToExisting) {
+                        stamper = PdfStamper.createSignature(reader, fout, '\0', tempDir, true);
+                    } else {
+                        stamper = PdfStamper.createSignature(reader, fout, '\0');
+                    }
 
-            if (visibility.equalsIgnoreCase(VISIBILITY_VISIBLE)) {
-                if (position != null && !position.trim().isEmpty() && !position.trim().equalsIgnoreCase(POSITION_MANUAL)) {
-                    Rectangle pageRect = reader.getPageSizeWithRotation(pageNumber);
-                    sap.setVisibleSignature(positionSignature(position, pageRect, width, height), pageNumber, null);
-                } else {
-                    sap.setVisibleSignature(new Rectangle(locationX, locationY, locationX + width, locationY - height), pageNumber, null);
+                    PdfSignatureAppearance sap = stamper.getSignatureAppearance();
+
+                    if (visibility.equalsIgnoreCase(VISIBILITY_VISIBLE)) {
+                        if (position != null && !position.trim().isEmpty() && !position.trim().equalsIgnoreCase(POSITION_MANUAL)) {
+                            Rectangle pageRect = reader.getPageSizeWithRotation(page);
+                            sap.setVisibleSignature(positionSignature(position, pageRect, width, height), page, null);
+                        } else {
+                            sap.setVisibleSignature(new Rectangle(locationX, locationY, locationX + width, locationY - height), page, null);
+                        }
+                    }
+
+                    ExternalDigest digest = new BouncyCastleDigest();
+                    ExternalSignature signature = new PrivateKeySignature(key, DigestAlgorithms.SHA256, "BC");
+
+                    MakeSignature.signDetached(sap, digest, signature, chain, null, null, null, 0, MakeSignature.CryptoStandard.CMS);
+
+                    String fileName = getFilename(params, targetNodeRef);
+
+                    destinationNode = createDestinationNode(fileName, (NodeRef) params.get(PARAM_DESTINATION_FOLDER), targetNodeRef, inplace);
+                    writer = cs.getWriter(destinationNode, ContentModel.PROP_CONTENT, true);
+
+                    writer.setEncoding(pdfReader.getEncoding());
+                    writer.setMimetype(FILE_MIMETYPE);
+                    writer.putContent(file);
+
+                    file.delete();
+
+                    if (useSignatureAspect) {
+                        ns.addAspect(destinationNode, PDFSignModel.ASPECT_SIGNED, new HashMap<QName, Serializable>());
+                        ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNATUREDATE, new Date());
+                        ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNEDBY, AuthenticationUtil.getRunAsUser());
+                    }
+
+                    if (fout != null) {
+                        try {
+                            fout.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if (tempDir != null) {
+                        try {
+                            for (File tempFile : tempDir.listFiles()) {
+                                tempFile.delete();
+                            }
+                            tempDir.delete();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    if (stamper != null) {
+                        try {
+                            stamper.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-            }
+            } else if (signLastPage || (specificPageNumber > 0 && specificPageNumber <= numPages)) {
+                ContentReader pdfReader = getReader(targetNodeRef);
+                PdfReader reader = new PdfReader(pdfReader.getContentInputStream());
 
-            ExternalDigest digest = new BouncyCastleDigest();
-            ExternalSignature signature = new PrivateKeySignature(key, DigestAlgorithms.SHA256, "BC");
+                File alfTempDir = TempFileProvider.getTempDir();
+                tempDir = new File(alfTempDir.getPath() + File.separatorChar + targetNodeRef.getId());
+                tempDir.mkdir();
+                File file = new File(tempDir, ffs.getFileInfo(targetNodeRef).getName());
 
-            MakeSignature.signDetached(sap, digest, signature, chain, null, null, null, 0, MakeSignature.CryptoStandard.CMS);
+                fout = new FileOutputStream(file);
 
-            String fileName = getFilename(params, targetNodeRef);
+                if (appendToExisting) {
+                    stamper = PdfStamper.createSignature(reader, fout, '\0', tempDir, true);
+                } else {
+                    stamper = PdfStamper.createSignature(reader, fout, '\0');
+                }
 
-            destinationNode = createDestinationNode(fileName, (NodeRef) params.get(PARAM_DESTINATION_FOLDER), targetNodeRef, inplace);
-            writer = cs.getWriter(destinationNode, ContentModel.PROP_CONTENT, true);
+                PdfSignatureAppearance sap = stamper.getSignatureAppearance();
 
-            writer.setEncoding(pdfReader.getEncoding());
-            writer.setMimetype(FILE_MIMETYPE);
-            writer.putContent(file);
+                specificPageNumber = (signLastPage) ? numPages : specificPageNumber;
 
-            file.delete();
+                if (visibility.equalsIgnoreCase(VISIBILITY_VISIBLE)) {
+                    if (position != null && !position.trim().isEmpty() && !position.trim().equalsIgnoreCase(POSITION_MANUAL)) {
+                        Rectangle pageRect = reader.getPageSizeWithRotation(specificPageNumber);
+                        sap.setVisibleSignature(positionSignature(position, pageRect, width, height), specificPageNumber, null);
+                    } else {
+                        sap.setVisibleSignature(new Rectangle(locationX, locationY, locationX + width, locationY - height), specificPageNumber, null);
+                    }
+                }
 
-            if (useSignatureAspect) {
-                ns.addAspect(destinationNode, PDFSignModel.ASPECT_SIGNED, new HashMap<QName, Serializable>());
-                ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNATUREDATE, new Date());
-                ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNEDBY, AuthenticationUtil.getRunAsUser());
+                ExternalDigest digest = new BouncyCastleDigest();
+                ExternalSignature signature = new PrivateKeySignature(key, DigestAlgorithms.SHA256, "BC");
+
+                MakeSignature.signDetached(sap, digest, signature, chain, null, null, null, 0, MakeSignature.CryptoStandard.CMS);
+
+                String fileName = getFilename(params, targetNodeRef);
+
+                destinationNode = createDestinationNode(fileName, (NodeRef) params.get(PARAM_DESTINATION_FOLDER), targetNodeRef, inplace);
+                writer = cs.getWriter(destinationNode, ContentModel.PROP_CONTENT, true);
+
+                writer.setEncoding(pdfReader.getEncoding());
+                writer.setMimetype(FILE_MIMETYPE);
+                writer.putContent(file);
+
+                file.delete();
+
+                if (useSignatureAspect) {
+                    ns.addAspect(destinationNode, PDFSignModel.ASPECT_SIGNED, new HashMap<QName, Serializable>());
+                    ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNATUREDATE, new Date());
+                    ns.setProperty(destinationNode, PDFSignModel.PROP_SIGNEDBY, AuthenticationUtil.getRunAsUser());
+                }
+
+                if (fout != null) {
+                    try {
+                        fout.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (tempDir != null) {
+                    try {
+                        for (File tempFile : tempDir.listFiles()) {
+                            tempFile.delete();
+                        }
+                        tempDir.delete();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                if (stamper != null) {
+                    try {
+                        stamper.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            } else {
+                throw new AlfrescoRuntimeException("Invalid page number specified.");
             }
         } catch (Exception e) {
             e.printStackTrace();
             throw new AlfrescoRuntimeException(e.getMessage(), e);
-        } finally {
-            if (fout != null) {
-                try {
-                    fout.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (tempDir != null) {
-                try {
-                    for (File tempFile : tempDir.listFiles()) {
-                        tempFile.delete();
-                    }
-                    tempDir.delete();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            if (stamper != null) {
-                try {
-                    stamper.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
         }
 
         return destinationNode;
