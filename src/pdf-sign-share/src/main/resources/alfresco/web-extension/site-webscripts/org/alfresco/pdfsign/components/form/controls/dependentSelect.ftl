@@ -1,28 +1,33 @@
 <#include "/org/alfresco/components/form/controls/common/utils.inc.ftl" />
 
 <#if field.control.params.showSelectValues??>
-	<#assign selectValues = field.control.params.showSelectValues?split(";")>
+<#assign selectValues = field.control.params.showSelectValues?split(";")>
 </#if>
 
 <#if field.control.params.optionSeparator??>
-   <#assign optionSeparator=field.control.params.optionSeparator>
+<#assign optionSeparator=field.control.params.optionSeparator>
 <#else>
-   <#assign optionSeparator=",">
+<#assign optionSeparator=",">
 </#if>
 <#if field.control.params.labelSeparator??>
-   <#assign labelSeparator=field.control.params.labelSeparator>
+<#assign labelSeparator=field.control.params.labelSeparator>
 <#else>
-   <#assign labelSeparator="|">
+<#assign labelSeparator="|">
 </#if>
 
-<#assign fieldValue=field.value>
+<#assign fieldValue = field.value>
+
+<#-- Set default value if fieldValue is empty or null -->
+<#if (fieldValue?string == "" || fieldValue?string?trim == "") && (field.control.params.defaultValue??)>
+<#assign fieldValue = field.control.params.defaultValue>
+</#if>
 
 <#if fieldValue?string == "" && field.control.params.defaultValueContextProperty??>
-   <#if context.properties[field.control.params.defaultValueContextProperty]??>
-      <#assign fieldValue = context.properties[field.control.params.defaultValueContextProperty]>
-   <#elseif args[field.control.params.defaultValueContextProperty]??>
-      <#assign fieldValue = args[field.control.params.defaultValueContextProperty]>
-   </#if>
+<#if context.properties[field.control.params.defaultValueContextProperty]??>
+<#assign fieldValue = context.properties[field.control.params.defaultValueContextProperty]>
+<#elseif args[field.control.params.defaultValueContextProperty]??>
+<#assign fieldValue = args[field.control.params.defaultValueContextProperty]>
+</#if>
 </#if>
 
 <div class="form-field">
@@ -73,9 +78,9 @@ var showSelectValues = [
 // the value of the selects
 var DependentSelect = new PDFSign.DependentSelect("${fieldHtmlId}").setOptions(
 	      {
-	         showSelectValues: showSelectValues,
-	         htmlId: "${args.htmlid}"
-	      }).setMessages(
+showSelectValues: showSelectValues,
+htmlId: "${args.htmlid}"
+}).setMessages(
 	         {}
 	      );
 //]]></script>
