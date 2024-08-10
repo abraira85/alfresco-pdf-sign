@@ -339,17 +339,24 @@ PDFSign.Util = {};
      * @method ShowDependentControls
      */
     PDFSign.Util.ShowDependentControls = function(fieldHtmlId, htmlIdPrefix) {
-        var value = YAHOO.util.Dom.get(fieldHtmlId + "-entry").checked;
-        YAHOO.util.Dom.get(fieldHtmlId).value = value;
-        var controls = YAHOO.util.Dom.get(fieldHtmlId + "-tohide").value.split(",");
+        var value = Dom.get(fieldHtmlId + "-entry").checked;
+        Dom.get(fieldHtmlId).value = value;
+        var controls = Dom.get(fieldHtmlId + "-tohide").value.split(",");
 
         for (var index in controls) {
-            var control = YAHOO.util.Dom.get((htmlIdPrefix + "_" + controls[index]));
+            var control = Dom.get(htmlIdPrefix + "_" + controls[index]);
             var container = control.parentElement;
             if (value) {
-                container.style.display = 'none';
+                container.style.setProperty('display', 'none', 'important');
             } else {
-                container.style.display = 'block';
+                container.style.setProperty('display', 'block', 'important');
+
+                var assocDiv = container.querySelector('div[id$="assoc_destination-folder-cntrl"]');
+                var assocLabel = container.querySelector('label[for$="assoc_destination-folder-cntrl"]');
+                if (assocDiv && assocLabel) {
+                    assocDiv.style.setProperty('display', 'block', 'important');
+                    assocLabel.style.setProperty('display', 'block', 'important');
+                }
             }
         }
     }

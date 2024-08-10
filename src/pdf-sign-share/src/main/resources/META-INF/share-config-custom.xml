@@ -115,11 +115,6 @@
                             <!-- Otros parámetros si es necesario -->
                         </control>
                     </field>
-<!--                    <field id="destination-folder">-->
-<!--                        <control template="/org/alfresco/pdfsign/components/form/controls/fileFinderField.ftl">-->
-<!--                            &lt;!&ndash; Otros parámetros si es necesario &ndash;&gt;-->
-<!--                        </control>-->
-<!--                    </field>-->
                     <field id="key-password">
                         <control template="/org/alfresco/pdfsign/components/form/controls/passwordTextField.ftl">
                             <!-- Otros parámetros si es necesario -->
@@ -154,6 +149,7 @@
 	<config evaluator="string-compare" condition="DocLibCustom">
 		<dependencies>
 			<js src="pdfsign/components/doclib/pdfsign-doclib-actions.js" />
+            <css src="pdfsign/components/doclib/custom-style.css" />
 		</dependencies>
 	</config>
 </alfresco-config>

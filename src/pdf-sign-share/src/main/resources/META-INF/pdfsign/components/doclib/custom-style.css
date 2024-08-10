@@ -1,0 +1,7 @@
+div[id$="assoc_destination-folder-cntrl"] {
+    display: none;
+}
+
+label[for$="assoc_destination-folder-cntrl"] {
+    display: none !important;
+}
