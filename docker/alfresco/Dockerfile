@@ -60,7 +60,7 @@ RUN java -jar $TOMCAT_DIR/alfresco-mmt/alfresco-mmt*.jar install \
 # Adjust permissions for Tomcat files:
 # - Change group ownership to ${GROUPNAME} for directories and files
 # - Set directory permissions to 0750 and file permissions to 0640
-# - Ensure that the group has read permissions for webapps and AMP files
+# - Ensure that the group has read permissions for webapps and AMP files \
 RUN chgrp -R ${GROUPNAME} ${TOMCAT_DIR}/webapps ${TOMCAT_DIR}/amps ${TOMCAT_DIR}/lib && \
     find ${TOMCAT_DIR}/webapps -type d -exec chmod 0750 {} \; && \
     find ${TOMCAT_DIR}/webapps -type f -exec chmod 0640 {} \; && \

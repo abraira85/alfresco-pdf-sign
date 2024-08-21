@@ -46,7 +46,14 @@
 \@ifpackageloaded{hyperref}{%
 \RequirePackage{xcolor}
 \providecolor{manuallinkcolor}{HTML}{004a0e}
-\hypersetup{colorlinks,allcolors=manuallinkcolor}%
+% \hypersetup{colorlinks,allcolors=manuallinkcolor}
+\hypersetup{
+    colorlinks=true,                 % false: boxed links; true: colored links
+    linkcolor=black,                 % color of internal links
+    urlcolor=red,                    % color of external links
+    citecolor=blue,                  % color of citations
+    filecolor=magenta                % color of file links
+}
 }{}%
 % let minted's listing captions use the correct font
 \@ifpackageloaded{minted}{\let\@float@c@listing\@caption}{}
