@@ -1,0 +1,144 @@
+%% *****************************************************************************
+%% 
+%% Alfresco PDF Sign - Installation Guide
+%% 
+%% Description: 
+%% This document provides a comprehensive guide for the installation, 
+%% configuration, and verification of the Alfresco PDF Sign plugin. 
+%% The plugin enables PDF signing capabilities within Alfresco Community 
+%% Edition 7.4.2. Detailed instructions are provided to ensure successful 
+%% deployment and integration with your existing Alfresco environment.
+%% 
+%% Author: 
+%% Rober de Avila Abraira
+%% 
+%% Version: 
+%% 1.0.0
+%% 
+%% Date: 
+%% 2024/08/20
+%% 
+%% License: 
+%% This document is licensed under the Apache License, Version 2.0. 
+%% You may not use this file except in compliance with the License. 
+%% A copy of the License can be obtained at:
+%% http://www.apache.org/licenses/LICENSE-2.0
+%% Unless required by applicable law or agreed to in writing, this 
+%% document is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
+%% OR CONDITIONS OF ANY KIND, either express or implied. See the 
+%% License for the specific language governing permissions and 
+%% limitations under the License.
+%% 
+%% *****************************************************************************
+
+
+\documentclass{ol-softwaremanual}
+
+% Packages used
+\usepackage[utf8]{inputenc} % for using Spanish characters
+\usepackage{graphicx}  % for including images
+\usepackage{microtype} % for typographical enhancements and better justification
+\usepackage{ragged2e} % for justifying content
+\usepackage{hyperref}  % for hyperlinks
+\usepackage{listings} % For code listings
+\usepackage{xcolor} % For customizing colors
+\usepackage[a4paper,top=4.2cm,bottom=4.2cm,left=3.5cm,right=3.5cm]{geometry} % for setting page size and margins
+
+\renewcommand{\contentsname}{Contenido}
+
+% Custom macros used in this example document
+\newcommand{\doclink}[2]{\href{#1}{#2}\footnote{\url{#1}}}
+\newcommand{\cs}[1]{\texttt{\textbackslash #1}}
+
+% Frontmatter data; appears on title page
+\title{Guía de Instalación \\ Alfresco PDF Sign}
+\version{1.0.0}
+\author{Rober de Avila Abraira}
+\softwarelogo{\includegraphics[width=8cm]{logo}}
+
+
+\begin{document}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+
+\section{Introducción}
+
+El plugin \textbf{Alfresco PDF Sign} ha sido desarrollado para permitir la firma digital de documentos PDF dentro del entorno de \textbf{Alfresco Community Edition 7.4.2}. Este plugin ofrece una integración directa con el sistema de gestión documental de Alfresco, facilitando la validación y autenticación de documentos mediante firmas digitales, lo que es crucial para garantizar la integridad y autenticidad en flujos de trabajo que manejan información sensible o regulada.
+
+Esta guía de instalación proporciona instrucciones detalladas y paso a paso para la configuración, instalación y verificación del plugin. Está dirigida a administradores de sistemas y desarrolladores que trabajan con Alfresco y necesitan implementar una solución robusta para la firma de documentos dentro de su infraestructura existente.
+
+\subsection{Objetivos de la Guía}
+Al completar esta guía, serás capaz de:
+
+\begin{itemize}
+	\item Instalar y configurar el plugin Alfresco PDF Sign en un entorno Alfresco existente.
+	\item Verificar que la instalación se haya realizado correctamente.
+	\item Resolver posibles problemas durante el proceso de instalación.
+	\item Configurar ajustes adicionales necesarios para adaptarse a las necesidades específicas de tu organización.
+\end{itemize}
+
+\subsection{Requisitos Previos}
+Antes de proceder con la instalación, asegúrate de cumplir con los siguientes requisitos:
+
+\begin{itemize}
+	\item \textbf{Alfresco Community Edition 7.4.2} debe estar instalado y en funcionamiento.
+	\item Debes tener acceso administrativo al servidor donde está instalado Alfresco.
+	\item Conocimientos básicos de administración de Alfresco y del sistema operativo subyacente.
+\end{itemize}
+
+\subsubsection{Opcionales:}
+\begin{itemize}
+	\item \textbf{Maven:} Solo es necesario si planeas construir la librería del plugin desde su código fuente. Si ya tienes el archivo .amp o .jar del plugin y no necesitas realizar ninguna compilación, Maven no es necesario.
+	\item \textbf{Docker y Docker Compose:} Opcionales para gestionar la instalación y el despliegue del plugin en contenedores. Utiliza esta opción si prefieres una instalación basada en contenedores en lugar de una instalación directa en Tomcat.
+\end{itemize}
+
+\subsection{Opciones de Instalación}
+El plugin \textbf{Alfresco PDF Sign} puede instalarse mediante diferentes métodos, dependiendo de las necesidades y la infraestructura disponible en tu entorno:
+
+\begin{enumerate}
+	\item \textbf{Instalación usando Docker (Recomendado)} \\
+	Esta opción facilita la gestión y el despliegue de Alfresco y sus componentes en contenedores, lo que puede simplificar la administración del entorno. Es ideal para aquellos que prefieren una solución rápida y reproducible utilizando tecnología de contenedores.
+	
+	\item \textbf{Instalación directa en Tomcat} \\
+	El plugin puede instalarse directamente en una instancia de Tomcat que ya esté ejecutando Alfresco. Este método es adecuado si ya tienes un entorno Alfresco configurado y prefieres no utilizar contenedores.
+\end{enumerate}
+
+
+\subsection{Opciones de Compilación}
+Al instalar el plugin Alfresco PDF Sign, tienes dos opciones principales según cómo prefieras manejar la compilación:
+
+\begin{itemize}
+	\item \textbf{Compilar el archivo .amp:} Si deseas personalizar el plugin o necesitas construirlo tú mismo, puedes generar el archivo .amp utilizando herramientas de construcción como Maven. Esta opción es ideal para desarrolladores o aquellos que requieren un mayor control sobre el proceso de instalación.
+	\item \textbf{Utilizar un archivo .amp precompilado (Recomendado):} Si prefieres una instalación más sencilla y directa, puedes optar por un archivo .amp ya compilado. Esta opción te permite instalar el plugin sin necesidad de realizar la compilación, lo que simplifica y acelera el proceso.
+\end{itemize}
+
+\section{Instalación del Plugin Alfresco PDF Sign}
+\subsection{Preparación del Entorno}
+\subsubsection{Verificación de los Requisitos Previos}
+Antes de iniciar la instalación, asegúrate de que todos los requisitos previos mencionados en la sección 1.2 estén cumplidos. Esto incluye la confirmación de que \textbf{Alfresco Community Edition 7.4.2} está en funcionamiento y que tienes acceso administrativo al servidor.
+
+\subsubsection{Descarga del Plugin}
+Puedes obtener el plugin de dos maneras, dependiendo de si deseas construir el archivo .amp desde el código fuente o utilizar una versión precompilada:
+
+\begin{itemize}
+	\item \textbf{Código Fuente:} Si deseas personalizar el plugin o necesitas construirlo, clona el repositorio desde GitHub:
+\begin{lstlisting}[
+	language=bash,
+	frame=single,
+	basicstyle=\ttfamily\scriptsize\color{white}, % Set text to white and slightly larger
+	backgroundcolor=\color{black}, % Set background to black
+	frame=single, % Frame around the code block
+	framerule=0pt, % Remove the frame rule (optional)
+]
+  git clone https://github.com/abraira85/alfresco-pdf-sign.git
+  cd alfresco-pdf-sign
+\end{lstlisting}
+	\item \textbf{Versión Precompilada:} Si prefieres una instalación más rápida y no necesitas modificar el plugin, puedes descargar el archivo .amp precompilado desde la sección de Releases del mismo repositorio en GitHub.
+\end{itemize}
+
+\end{document}
+

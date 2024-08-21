@@ -2,3 +2,10 @@ src/pdf-sign-repo/target
 src/pdf-sign-share/target
 .idea/
 .vscode/
+
+**/**/guide.aux
+**/**/guide.log
+**/**/guide.lol
+**/**/guide.out
+**/**/guide.synctex.gz
+**/**/guide.toc
