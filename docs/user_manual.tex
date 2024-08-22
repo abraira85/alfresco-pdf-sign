@@ -1,38 +1,38 @@
 %% *****************************************************************************
-%% 
+%%
 %% Alfresco PDF Sign - Installation Guide
-%% 
-%% Description: 
-%% This document provides a comprehensive guide for the installation, 
-%% configuration, and verification of the Alfresco PDF Sign plugin. 
-%% The plugin enables PDF signing capabilities within Alfresco Community 
-%% Edition 7.4.2. Detailed instructions are provided to ensure successful 
+%%
+%% Description:
+%% This document provides a comprehensive guide for the installation,
+%% configuration, and verification of the Alfresco PDF Sign plugin.
+%% The plugin enables PDF signing capabilities within Alfresco Community
+%% Edition 7.4.2. Detailed instructions are provided to ensure successful
 %% deployment and integration with your existing Alfresco environment.
-%% 
-%% Author: 
+%%
+%% Author:
 %% Rober de Avila Abraira
-%% 
-%% Version: 
+%%
+%% Version:
 %% 1.0.0
-%% 
-%% Date: 
+%%
+%% Date:
 %% 2024/08/20
-%% 
-%% License: 
-%% This document is licensed under the Apache License, Version 2.0. 
-%% You may not use this file except in compliance with the License. 
+%%
+%% License:
+%% This document is licensed under the Apache License, Version 2.0.
+%% You may not use this file except in compliance with the License.
 %% A copy of the License can be obtained at:
 %% http://www.apache.org/licenses/LICENSE-2.0
-%% Unless required by applicable law or agreed to in writing, this 
-%% document is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES 
-%% OR CONDITIONS OF ANY KIND, either express or implied. See the 
-%% License for the specific language governing permissions and 
+%% Unless required by applicable law or agreed to in writing, this
+%% document is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
+%% OR CONDITIONS OF ANY KIND, either express or implied. See the
+%% License for the specific language governing permissions and
 %% limitations under the License.
-%% 
+%%
 %% *****************************************************************************
 
 
-\documentclass{ol-softwaremanual}
+\documentclass{template/ol-softwaremanual.cls}
 
 % Packages used
 \usepackage[utf8]{inputenc} % for using Spanish characters
@@ -54,7 +54,7 @@
 \title{Guía de Instalación \\ Alfresco PDF Sign}
 \version{1.0.0}
 \author{Rober de Avila Abraira}
-\softwarelogo{\includegraphics[width=8cm]{logo}}
+\softwarelogo{\includegraphics[width=8cm]{images/logo}}
 
 
 \begin{document}
@@ -67,7 +67,7 @@
 
 \section{Introducción}
 
-\textbf{Alfresco PDF Sign} es un plugin que ha sido desarrollado específicamente para añadir funcionalidades avanzadas de firma digital a documentos PDF dentro de la plataforma \textbf{Alfresco Community Edition 7.4.2}. Este plugin permite a los usuarios agregar firmas digitales visibles o invisibles a los documentos PDF almacenados en Alfresco, asegurando la autenticidad e integridad de los documentos. 
+\textbf{Alfresco PDF Sign} es un plugin que ha sido desarrollado específicamente para añadir funcionalidades avanzadas de firma digital a documentos PDF dentro de la plataforma \textbf{Alfresco Community Edition 7.4.2}. Este plugin permite a los usuarios agregar firmas digitales visibles o invisibles a los documentos PDF almacenados en Alfresco, asegurando la autenticidad e integridad de los documentos.
 
 Además, el plugin ofrece opciones para personalizar la ubicación de la firma, seleccionar diferentes certificados digitales, y automatizar el proceso de firma mediante reglas aplicadas a carpetas específicas. Estas capacidades son esenciales para garantizar la integridad y autenticidad de los documentos en flujos de trabajo que manejan información sensible o regulada.
 
@@ -103,7 +103,7 @@ La forma más sencilla y rápida de instalar el plugin es utilizando los archivo
 
 \begin{enumerate}
 	\item \textbf{Accede a la sección de releases en GitHub:} Visita la página de \href{https://github.com/abraira85/alfresco-pdf-sign/releases}{releases} del proyecto en GitHub.
-	\item \textbf{Selecciona la versión del plugin:} Busca la versión más reciente del plugin disponible en la lista de releases. 
+	\item \textbf{Selecciona la versión del plugin:} Busca la versión más reciente del plugin disponible en la lista de releases.
 	\item \textbf{Descarga los archivos .amp:} Haz clic en el enlace de descarga para obtener los archivos .amp precompilados. Guarda estos archivos en una ubicación accesible en tu servidor donde está instalado Alfresco.
 	\item \textbf{Preparación para la instalación:} Una vez descargado, puedes proceder con la instalación de los archivos .amp en Alfresco, utilizando ya sea Docker o Tomcat, según tus necesidades.
 \end{enumerate}
@@ -134,7 +134,7 @@ Si necesitas personalizar el plugin o prefieres construirlo desde el código fue
 	framerule=0pt, % Remove the frame rule (optional)
 	]
  cd alfresco-pdf-sign
-\end{lstlisting}	
+\end{lstlisting}
 	\item \textbf{Compila y genera los ficheros \textsl{.amp}:} Si tienes Maven instalado, puedes compilar el plugin ejecutando: \\
 {\small Compila el plugin para Alfresco.}
 \begin{lstlisting}[
@@ -200,7 +200,7 @@ Si necesitas personalizar el plugin o prefieres construirlo desde el código fue
  [INFO] Total time:  2.372 s
  [INFO] Finished at: 2024-08-21T07:31:09+02:00
  [INFO] ------------------------------------------------------------------------
-\end{lstlisting}	
+\end{lstlisting}
 {\small Estos comandos generaran dos archivos .amp en el directorio target/amps de cada una de las carpetas. Copia estos archivos o otra carpeta para que lo uses luego en la instalación.}
 \begin{lstlisting}[
 	language=bash,
@@ -225,7 +225,7 @@ Si necesitas personalizar el plugin o prefieres construirlo desde el código fue
 	\item \textbf{Verificar el entorno de Alfresco:}
 	\begin{itemize}
 		\item Asegúrate de que Alfresco está instalado y funcionando correctamente en Tomcat.
-		\item Detén el servicio de Alfresco para evitar problemas durante la instalación:	
+		\item Detén el servicio de Alfresco para evitar problemas durante la instalación:
 \begin{lstlisting}[
 	language=bash,
 	frame=single,
@@ -306,7 +306,7 @@ Si necesitas personalizar el plugin o prefieres construirlo desde el código fue
 	framerule=0pt, % Remove the frame rule (optional)
 	]
  tail -f /path/to/tomcat/logs/catalina.out
-\end{lstlisting}	
+\end{lstlisting}
 	\end{itemize}
 \end{enumerate}
 
@@ -317,7 +317,7 @@ Si necesitas personalizar el plugin o prefieres construirlo desde el código fue
 	\item \textbf{Acceder a Alfresco:}
 	\begin{itemize}
 		\item Una vez que Alfresco esté en funcionamiento, accede a través de \textit{http://<tu-servidor>:8080/alfresco}.
-	\end{itemize} 
+	\end{itemize}
 	\item \textbf{Comprobar la funcionalidad del plugin:}
 	\begin{itemize}
 		\item Verifica que las funcionalidades proporcionadas por el plugin estén disponibles en \textbf{Alfresco Share}.
@@ -356,7 +356,7 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
 	framerule=0pt, % Remove the frame rule (optional)
 	]
  docker exec -it <nombre_del_contenedor_alfresco> /bin/bash
-\end{lstlisting}		
+\end{lstlisting}
 	\end{itemize}
 	\item \textbf{Copiar y aplicar el archivo AMP}
 	\begin{itemize}
@@ -371,7 +371,7 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
 	]
  # Sustituye el <nombre> por el nombre del contenedor de Alfresco.
  docker cp pdf-sign-repo-1.0.0.amp <nombre>:/usr/local/tomcat/amps/
-\end{lstlisting}	
+\end{lstlisting}
 		\item Aplica el archivo AMP en el repositorio utilizando la herramienta MMT:
 \begin{lstlisting}[
 	language=bash,
@@ -381,9 +381,9 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
 	frame=single, % Frame around the code block
 	framerule=0pt, % Remove the frame rule (optional)
 	]
- java -jar /usr/local/tomcat/alfresco-mmt/alfresco-mmt*.jar install \ 
-  /usr/local/tomcat/amps /usr/local/tomcat/webapps/alfresco \ 
-  -directory -nobackup -force -verbose	
+ java -jar /usr/local/tomcat/alfresco-mmt/alfresco-mmt*.jar install \
+  /usr/local/tomcat/amps /usr/local/tomcat/webapps/alfresco \
+  -directory -nobackup -force -verbose
 \end{lstlisting}
 	\end{itemize}
 	\item \textbf{Ajustar los permisos y reiniciar el contenedor:	}
@@ -397,15 +397,15 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
 	frame=single, % Frame around the code block
 	framerule=0pt, % Remove the frame rule (optional)
 	]
- chgrp -R Alfresco /usr/local/tomcat/webapps \ 
+ chgrp -R Alfresco /usr/local/tomcat/webapps \
    /usr/local/tomcat/amps /usr/local/tomcat/lib
- 
+
  find /usr/local/tomcat/webapps -type d -exec chmod 0750 {} \;
- 
+
  find /usr/local/tomcat/webapps -type f -exec chmod 0640 {} \;
- 
+
  chmod -R g+r /usr/local/tomcat/webapps
- 
+
  chmod 664 /usr/local/tomcat/amps/*
 \end{lstlisting}
 	\item Reinicia el contenedor:
@@ -417,7 +417,7 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
 	frame=single, % Frame around the code block
 	framerule=0pt, % Remove the frame rule (optional)
 	]
- docker restart <nombre_del_contenedor_alfresco>	
+ docker restart <nombre_del_contenedor_alfresco>
 \end{lstlisting}
 	\end{itemize}
 \end{enumerate}
@@ -448,7 +448,7 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
 	framerule=0pt, % Remove the frame rule (optional)
 	]
  docker exec -it <nombre_del_contenedor_share> /bin/bash
-\end{lstlisting}		
+\end{lstlisting}
 	\end{itemize}
 	\item \textbf{Copiar y aplicar el archivo AMP de Share:}
 	\begin{itemize}
@@ -463,7 +463,7 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
 	]
  # Sustituye el <nombre> por el nombre del contenedor de Alfresco Share.
  docker cp pdf-sign-share-1.0.0.amp <nombre>:/usr/local/tomcat/amps_share/
-\end{lstlisting}	
+\end{lstlisting}
 		\item Aplica el archivo AMP en Share utilizando la herramienta MMT:
 \begin{lstlisting}[
 	language=bash,
@@ -474,8 +474,8 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
 	framerule=0pt, % Remove the frame rule (optional)
 	]
  java -jar /usr/local/tomcat/alfresco-mmt/alfresco-mmt*.jar install \
-  /usr/local/tomcat/amps_share /usr/local/tomcat/webapps/share \ 
-  -directory -nobackup -force -verbose	
+  /usr/local/tomcat/amps_share /usr/local/tomcat/webapps/share \
+  -directory -nobackup -force -verbose
 \end{lstlisting}
 	\end{itemize}
 	\item \textbf{Ajustar los permisos y reiniciar el contenedor:	}
@@ -489,15 +489,15 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
 	frame=single, % Frame around the code block
 	framerule=0pt, % Remove the frame rule (optional)
 	]
- chgrp -R Alfresco /usr/local/tomcat/webapps \ 
+ chgrp -R Alfresco /usr/local/tomcat/webapps \
    /usr/local/tomcat/amps /usr/local/tomcat/lib
-   
+
  find /usr/local/tomcat/webapps -type d -exec chmod 0750 {} \;
- 
+
  find /usr/local/tomcat/webapps -type f -exec chmod 0640 {} \;
- 
+
  chmod -R g+r /usr/local/tomcat/webapps
- 
+
  chmod 664 /usr/local/tomcat/amps/*
 \end{lstlisting}
 	\item Reinicia el contenedor:
@@ -512,7 +512,7 @@ Si ya tienes un entorno Alfresco ejecutándose en Docker, puedes seguir estos pa
  docker restart <nombre_del_contenedor_alfresco>
 \end{lstlisting}
 	\end{itemize}
-\end{enumerate}	
+\end{enumerate}
 
 
 \section{Verificación de la instalación}
@@ -530,7 +530,7 @@ Después de instalar el plugin \textbf{Alfresco PDF Sign} en tu entorno Alfresco
 		\item Navega a la URL: \\ \textit{http://<tu-servidor>:8080/share/page/modules/deploy}
 		\begin{figure}[h]
 			\centering
-			\includegraphics[width=\textwidth]{module.png}
+			\includegraphics[width=\textwidth]{images/module}
 			\label{fig:etiqueta_imagen}
 		\end{figure}
 		\item Verifica que el plugin Alfresco PDF Sign esté listado y activo.
@@ -547,7 +547,7 @@ Para aprovechar al máximo el plugin \textbf{Alfresco PDF Sign}, es esencial acc
 	\item \textbf{Guía de usuario de Alfresco}\\
 	Documentación oficial de Alfresco, incluyendo guías para usuarios, administradores y desarrolladores.\\
 	\url{https://docs.alfresco.com/}
-	
+
 	\item \textbf{Documentación del plugin Alfresco PDF Sign}\\
 	Información detallada sobre la instalación, configuración y uso del plugin en su repositorio de GitHub.\\
 	\url{https://github.com/abraira85/alfresco-pdf-sign/tree/master/docs}
@@ -559,11 +559,11 @@ Para aprovechar al máximo el plugin \textbf{Alfresco PDF Sign}, es esencial acc
 	\item \textbf{Repositorio GitHub del plugin Alfresco PDF Sign}\\
 	Acceso al código fuente, releases y más información sobre el plugin.\\
 	\url{https://github.com/abraira85/alfresco-pdf-sign}
-	
+
 	\item \textbf{Comunidad Alfresco}\\
 	Foro y comunidad de usuarios y desarrolladores de Alfresco para compartir conocimientos y resolver dudas.\\
 	\url{https://hub.alfresco.com/}
-	
+
 	\item \textbf{Docker Hub - Alfresco Images}\\
 	Página oficial de Alfresco en Docker Hub, con las imágenes Docker oficiales para Alfresco.\\
 	\url{https://hub.docker.com/u/alfresco}

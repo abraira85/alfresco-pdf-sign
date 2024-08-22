@@ -3,9 +3,9 @@ src/pdf-sign-share/target
 .idea/
 .vscode/
 
-**/**/guide.aux
-**/**/guide.log
-**/**/guide.lol
-**/**/guide.out
-**/**/guide.synctex.gz
-**/**/guide.toc
+docs/*.aux
+docs/*.log
+docs/*.lol
+docs/*.out
+docs/*.synctex.gz
+docs/*.toc
