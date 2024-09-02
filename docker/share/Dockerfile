@@ -25,7 +25,7 @@
 # ******************************************************************************
 
 # Use the official Alfresco Share image as the base image
-FROM docker.io/alfresco/alfresco-share:7.4.2
+FROM registry.outboss.io/alfresco/alfresco-share:7.4.2
 
 # Define build argument for Tomcat directory
 ARG TOMCAT_DIR=/usr/local/tomcat

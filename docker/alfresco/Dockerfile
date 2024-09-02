@@ -25,7 +25,7 @@
 # ******************************************************************************
 
 # Use the official Alfresco Content Repository Community image as the base image
-FROM alfresco/alfresco-content-repository-community:7.4.2
+FROM registry.outboss.io/alfresco/alfresco-content-repository-community:7.4.2
 
 # Define build arguments for Tomcat directory, group name, and image username
 ARG TOMCAT_DIR=/usr/local/tomcat
